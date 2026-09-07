@@ -657,6 +657,7 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
   const [lightboxIdx, setLightboxIdx] = useState(null);
   const isDone = order.stage === DONE_KEY;
   const meta = stageMeta(order.stage);
+  const nextMeta = stageMeta(nextStage(order.stage));
   const detailFileRef = useRef(null);
 
   function handleGrupBlur() {
@@ -752,7 +753,7 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
               placeholder="Nama orang yang mengerjakan"
             />
             <button className="kpp-advance-btn" onClick={handleAdvance} disabled={!nama.trim()}>
-              Tandai mulai {meta.label} <ArrowRight size={15} />
+              Tandai mulai {nextMeta.label} <ArrowRight size={15} />
             </button>
           </div>
         )}
