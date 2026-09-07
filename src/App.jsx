@@ -151,8 +151,9 @@ export default function App() {
   }
 
   function advance(order, nama) {
-    const entry = { stage: order.stage, label: stageMeta(order.stage).label, nama: nama.trim(), at: new Date().toISOString() };
-    persistUpdate(order, { stage: nextStage(order.stage), history: [...order.history, entry] });
+    const next = nextStage(order.stage);
+    const entry = { stage: next, label: stageMeta(next).label, nama: nama.trim(), at: new Date().toISOString() };
+    persistUpdate(order, { stage: next, history: [...order.history, entry] });
   }
 
   function revert(order) {
@@ -184,8 +185,9 @@ export default function App() {
     const at = new Date().toISOString();
     const targets = orders.filter((o) => selectedIds.has(o.id) && o.stage !== DONE_KEY);
     targets.forEach((o) => {
-      const entry = { stage: o.stage, label: stageMeta(o.stage).label, nama: nama.trim(), at };
-      persistUpdate(o, { stage: nextStage(o.stage), history: [...o.history, entry] });
+      const next = nextStage(o.stage);
+      const entry = { stage: next, label: stageMeta(next).label, nama: nama.trim(), at };
+      persistUpdate(o, { stage: next, history: [...o.history, entry] });
     });
     clearSelection();
   }
@@ -744,7 +746,7 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
           <div className="kpp-done-note">Pesanan ini sudah selesai packing.</div>
         ) : (
           <div className="kpp-advance-box" style={{ "--accent": meta.accent }}>
-            <label htmlFor="namaPemroses">Nama pemroses tahap {meta.label.toLowerCase()}</label>
+            <label htmlFor="namaPemroses">Nama pemroses tahap {nextMeta.label.toLowerCase()}</label>
             <input
               id="namaPemroses"
               type="text"
