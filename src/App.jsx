@@ -181,6 +181,12 @@ export default function App() {
     setSelectedIds(new Set());
   }
 
+  function bulkRevert() {
+    const targets = orders.filter((o) => selectedIds.has(o.id) && o.history.length > 0);
+    targets.forEach((o) => revert(o));
+    clearSelection();
+  }
+
   function bulkAdvance(nama) {
     const at = new Date().toISOString();
     const targets = orders.filter((o) => selectedIds.has(o.id) && o.stage !== DONE_KEY);
@@ -497,6 +503,7 @@ export default function App() {
           count={selectedIds.size}
           onCancel={clearSelection}
           onSubmit={bulkAdvance}
+          onRevert={bulkRevert}
         />
       )}
 
@@ -519,7 +526,7 @@ export default function App() {
   );
 }
 
-function BulkBar({ count, onCancel, onSubmit }) {
+function BulkBar({ count, onCancel, onSubmit, onRevert }) {
   const [nama, setNama] = useState("");
 
   function handleSubmit(e) {
@@ -544,6 +551,9 @@ function BulkBar({ count, onCancel, onSubmit }) {
         />
         <button type="submit" className="kpp-btn-primary kpp-bulkbar-btn" disabled={!nama.trim()}>
           Proses semua <ArrowRight size={14} />
+        </button>
+        <button type="button" className="kpp-btn-ghost kpp-bulkbar-btn" onClick={onRevert}>
+          <RotateCcw size={13} /> Kembalikan
         </button>
         <button type="button" className="kpp-btn-ghost kpp-bulkbar-btn" onClick={onCancel}>
           Batal
