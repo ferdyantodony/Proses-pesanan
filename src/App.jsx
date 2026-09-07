@@ -257,7 +257,7 @@ export default function App() {
       `}</style>
 
       <header className="kpp-header">
-        <h1 className="kpp-title">Kanban Produksi</h1>
+        <h1 className="kpp-title">Proses Pesanan</h1>
         <p className="kpp-sub">
           Lacak setiap pesanan dari cetak sampai packing. Setiap tahap mencatat nama orang yang mengerjakannya.
           Data tersimpan di server bersama — semua yang membuka aplikasi ini melihat dan mengubah data yang sama.
