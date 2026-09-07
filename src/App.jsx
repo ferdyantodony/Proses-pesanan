@@ -292,7 +292,7 @@ export default function App() {
         .kpp-card-selected { border-color: #2F4A73; box-shadow: 0 0 0 1px #2F4A73; }
         .kpp-card-check { position: absolute; top: 7px; left: 7px; z-index: 2; width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; background: rgba(251,249,243,0.9); border-radius: 4px; cursor: pointer; }
         .kpp-card-check input { margin: 0; accent-color: #2F4A73; cursor: pointer; width: 15px; height: 15px; }
-        .kpp-card-img { width: 100%; height: 108px; object-fit: cover; display: block; background: #EDEADF; }
+        .kpp-card-img { width: 100%; height: 108px; object-fit: contain; display: block; background: #EDEADF; }
         .kpp-card-noimg { width: 100%; height: 108px; display: flex; align-items: center; justify-content: center; color: #B7B09B; background: #EDEADF; }
         .kpp-card-body { padding: 9px 10px 10px; }
         .kpp-card-resi { font-size: 11px; font-weight: 600; color: #6B6659; letter-spacing: 0.02em; margin-bottom: 3px; }
@@ -351,14 +351,14 @@ export default function App() {
 
         .kpp-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
         .kpp-preview-item { position: relative; border-radius: 5px; overflow: hidden; border: 1px solid #D4CEBC; aspect-ratio: 1; }
-        .kpp-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .kpp-preview-item img { width: 100%; height: 100%; object-fit: contain; display: block; background: #EDEADF; }
         .kpp-preview-remove { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; background: rgba(32,30,27,0.72); color: #FBF9F3; border: none; border-radius: 50%; padding: 0; }
         .kpp-preview-remove:hover { background: #9A4438; }
 
         .kpp-gallery { margin-bottom: 14px; }
         .kpp-gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
         .kpp-gallery-item { position: relative; border-radius: 6px; overflow: hidden; border: 1px solid #D4CEBC; aspect-ratio: 1; padding: 0; background: none; }
-        .kpp-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .kpp-gallery-item img { width: 100%; height: 100%; object-fit: contain; display: block; background: #EDEADF; }
         .kpp-gallery-remove { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: rgba(32,30,27,0.72); color: #FBF9F3; border: none; border-radius: 50%; padding: 0; }
         .kpp-gallery-remove:hover { background: #9A4438; }
         .kpp-gallery-empty { font-size: 12.5px; color: #918C7C; padding: 10px 0; }
