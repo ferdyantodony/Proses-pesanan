@@ -3,13 +3,13 @@ import { Plus, Search, X, Trash2, Upload, ArrowRight, RotateCcw, Clock, ImageOff
 import { supabase } from "./supabaseClient";
 
 const STAGES = [
-  { key: "cetak", label: "Cetak", accent: "#B5651D" },
-  { key: "gunting", label: "Gunting", accent: "#55625F" },
-  { key: "jahit", label: "Jahit", accent: "#8B2E3A" },
-  { key: "packing", label: "Packing", accent: "#6B5637" },
+  { key: "cetak", label: "Desain", accent: "#B5651D" },
+  { key: "gunting", label: "Cetak", accent: "#55625F" },
+  { key: "jahit", label: "Gunting", accent: "#8B2E3A" },
+  { key: "packing", label: "Jahit", accent: "#6B5637" },
 ];
 const DONE_KEY = "selesai";
-const COLUMNS = [...STAGES, { key: DONE_KEY, label: "Selesai", accent: "#3F6B4E" }];
+const COLUMNS = [...STAGES, { key: DONE_KEY, label: "Packing", accent: "#3F6B4E" }];
 const TABLE = "orders";
 
 function newId() {
@@ -379,7 +379,7 @@ export default function App() {
       <header className="kpp-header">
         <h1 className="kpp-title">Proses Pesanan</h1>
         <p className="kpp-sub">
-          Lacak setiap pesanan dari cetak sampai packing. Setiap tahap mencatat nama orang yang mengerjakannya.
+          Lacak setiap pesanan dari desain sampai packing. Setiap tahap mencatat nama orang yang mengerjakannya.
           Data tersimpan di server bersama — semua yang membuka aplikasi ini melihat dan mengubah data yang sama.
         </p>
         <div className="kpp-toolbar">
@@ -752,7 +752,7 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
               placeholder="Nama orang yang mengerjakan"
             />
             <button className="kpp-advance-btn" onClick={handleAdvance} disabled={!nama.trim()}>
-              Tandai selesai {meta.label} <ArrowRight size={15} />
+              Tandai mulai {meta.label} <ArrowRight size={15} />
             </button>
           </div>
         )}
