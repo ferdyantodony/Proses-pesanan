@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Plus, Search, X, Trash2, Upload, ArrowRight, RotateCcw, Clock, ImageOff, CheckSquare, Users, Images as ImagesIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Search, X, Trash2, Upload, ArrowRight, RotateCcw, Clock, ImageOff, CheckSquare, Users } from "lucide-react";
 import { supabase } from "./supabaseClient";
 
 const STAGES = [
@@ -74,7 +74,7 @@ function rowToOrder(row) {
     id: row.id,
     noResi: row.no_resi || "",
     deskripsi: row.deskripsi || "",
-    images: Array.isArray(row.images) && row.images.length ? row.images : row.image ? [row.image] : [],
+    image: row.image || null,
     grup: row.grup || "",
     stage: row.stage,
     createdAt: row.created_at,
@@ -113,7 +113,7 @@ export default function App() {
       id: newId(),
       noResi: formData.noResi.trim(),
       deskripsi: formData.deskripsi.trim(),
-      images: formData.images || [],
+      image: formData.image || null,
       grup: formData.grup.trim(),
       stage: "cetak",
       createdAt: new Date().toISOString(),
@@ -125,7 +125,7 @@ export default function App() {
       id: order.id,
       no_resi: order.noResi,
       deskripsi: order.deskripsi,
-      images: order.images,
+      image: order.image,
       grup: order.grup,
       stage: order.stage,
       history: order.history,
@@ -196,16 +196,6 @@ export default function App() {
     const { error } = await supabase.from(TABLE).update({ grup }).eq("id", order.id);
     if (error) {
       setNotice("Gagal menyimpan grup ke server.");
-      setOrders((cur) => cur.map((o) => (o.id === order.id ? order : o)));
-    }
-  }
-
-  async function updateImages(order, images) {
-    const updated = { ...order, images };
-    setOrders((cur) => cur.map((o) => (o.id === order.id ? updated : o)));
-    const { error } = await supabase.from(TABLE).update({ images }).eq("id", order.id);
-    if (error) {
-      setNotice("Gagal menyimpan foto ke server.");
       setOrders((cur) => cur.map((o) => (o.id === order.id ? order : o)));
     }
   }
@@ -338,30 +328,6 @@ export default function App() {
         .kpp-delete-btn { display: inline-flex; align-items: center; gap: 6px; background: none; border: 1px solid #C4675A; color: #9A4438; border-radius: 5px; padding: 8px 13px; font-size: 13px; }
         .kpp-delete-btn:hover { background: #F5E4E1; }
 
-        .kpp-card-imgwrap { position: relative; }
-        .kpp-card-imgcount { position: absolute; bottom: 6px; right: 6px; display: inline-flex; align-items: center; gap: 3px; background: rgba(32,30,27,0.72); color: #FBF9F3; font-size: 10.5px; font-weight: 600; padding: 2px 6px; border-radius: 9px; }
-
-        .kpp-preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
-        .kpp-preview-item { position: relative; border-radius: 5px; overflow: hidden; border: 1px solid #D4CEBC; aspect-ratio: 1; }
-        .kpp-preview-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .kpp-preview-remove { position: absolute; top: 3px; right: 3px; width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; background: rgba(32,30,27,0.72); color: #FBF9F3; border: none; border-radius: 50%; padding: 0; }
-        .kpp-preview-remove:hover { background: #9A4438; }
-
-        .kpp-gallery { margin-bottom: 14px; }
-        .kpp-gallery-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px; }
-        .kpp-gallery-item { position: relative; border-radius: 6px; overflow: hidden; border: 1px solid #D4CEBC; aspect-ratio: 1; padding: 0; background: none; }
-        .kpp-gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
-        .kpp-gallery-remove { position: absolute; top: 3px; right: 3px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; background: rgba(32,30,27,0.72); color: #FBF9F3; border: none; border-radius: 50%; padding: 0; }
-        .kpp-gallery-remove:hover { background: #9A4438; }
-        .kpp-gallery-empty { font-size: 12.5px; color: #918C7C; padding: 10px 0; }
-
-        .kpp-lightbox { position: fixed; inset: 0; background: rgba(20,18,16,0.9); display: flex; align-items: center; justify-content: center; z-index: 60; padding: 24px; }
-        .kpp-lightbox img { max-width: 100%; max-height: 80vh; border-radius: 6px; object-fit: contain; }
-        .kpp-lightbox-close { position: absolute; top: 16px; right: 16px; background: rgba(255,255,255,0.12); border: none; color: #FBF9F3; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .kpp-lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,0.12); border: none; color: #FBF9F3; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .kpp-lightbox-prev { left: 16px; }
-        .kpp-lightbox-next { right: 16px; }
-
         .kpp-loading { text-align: center; padding: 60px 0; color: #8C8676; font-size: 14px; }
 
         .kpp-field-hint { font-size: 11.5px; color: #8C8676; margin: 5px 0 0; line-height: 1.4; }
@@ -456,15 +422,8 @@ export default function App() {
                                   onChange={() => toggleSelect(o.id)}
                                 />
                               </label>
-                              {o.images[0] ? (
-                                <div className="kpp-card-imgwrap">
-                                  <img className="kpp-card-img" src={o.images[0]} alt={o.deskripsi || "Foto pesanan"} />
-                                  {o.images.length > 1 && (
-                                    <span className="kpp-card-imgcount">
-                                      <ImagesIcon size={10} /> {o.images.length}
-                                    </span>
-                                  )}
-                                </div>
+                              {o.image ? (
+                                <img className="kpp-card-img" src={o.image} alt={o.deskripsi || "Foto pesanan"} />
                               ) : (
                                 <div className="kpp-card-noimg"><ImageOff size={22} /></div>
                               )}
@@ -510,7 +469,6 @@ export default function App() {
           onRevert={() => revert(detailOrder)}
           onDelete={() => removeOrder(detailOrder.id)}
           onEditGrup={(grup) => updateGrup(detailOrder, grup)}
-          onEditImages={(images) => updateImages(detailOrder, images)}
         />
       )}
     </div>
@@ -555,37 +513,24 @@ function NewOrderModal({ onClose, onSubmit, existingGroups }) {
   const [noResi, setNoResi] = useState("");
   const [deskripsi, setDeskripsi] = useState("");
   const [grup, setGrup] = useState("");
-  const [images, setImages] = useState([]);
+  const [image, setImage] = useState(null);
   const [processing, setProcessing] = useState(false);
   const fileRef = useRef(null);
 
-  function handleFiles(e) {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
+  function handleFile(e) {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
     setProcessing(true);
-    let remaining = files.length;
-    const results = [];
-    files.forEach((file) => {
-      resizeImage(file, 640, (dataUrl) => {
-        if (dataUrl) results.push(dataUrl);
-        remaining -= 1;
-        if (remaining === 0) {
-          setImages((cur) => [...cur, ...results]);
-          setProcessing(false);
-        }
-      });
+    resizeImage(file, 640, (dataUrl) => {
+      setImage(dataUrl);
+      setProcessing(false);
     });
-    e.target.value = "";
-  }
-
-  function removeImage(idx) {
-    setImages((cur) => cur.filter((_, i) => i !== idx));
   }
 
   function handleSubmit(e) {
     e.preventDefault();
     if (!noResi.trim() && !deskripsi.trim()) return;
-    onSubmit({ noResi, deskripsi, images, grup });
+    onSubmit({ noResi, deskripsi, image, grup });
   }
 
   const canSubmit = (noResi.trim() || deskripsi.trim()) && !processing;
@@ -622,23 +567,12 @@ function NewOrderModal({ onClose, onSubmit, existingGroups }) {
             <textarea id="deskripsi" value={deskripsi} onChange={(e) => setDeskripsi(e.target.value)} placeholder="Contoh: Kaos polos hitam, ukuran L, sablon logo dada" />
           </div>
           <div className="kpp-field">
-            <label>Foto (boleh lebih dari satu)</label>
-            <input ref={fileRef} type="file" accept="image/*" multiple onChange={handleFiles} style={{ display: "none" }} />
+            <label>Foto</label>
+            <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} style={{ display: "none" }} />
             <button type="button" className="kpp-file-btn" onClick={() => fileRef.current?.click()}>
-              <Upload size={14} /> {processing ? "Memproses foto..." : images.length ? "Tambah foto lagi" : "Unggah foto"}
+              <Upload size={14} /> {processing ? "Memproses foto..." : image ? "Ganti foto" : "Unggah foto"}
             </button>
-            {images.length > 0 && (
-              <div className="kpp-preview-grid">
-                {images.map((src, idx) => (
-                  <div className="kpp-preview-item" key={idx}>
-                    <img src={src} alt={`Pratinjau ${idx + 1}`} />
-                    <button type="button" className="kpp-preview-remove" onClick={() => removeImage(idx)}>
-                      <X size={12} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
+            {image && <img className="kpp-preview" src={image} alt="Pratinjau" />}
           </div>
           <div className="kpp-submit-row">
             <button type="button" className="kpp-btn-ghost" onClick={onClose}>Batal</button>
@@ -650,40 +584,14 @@ function NewOrderModal({ onClose, onSubmit, existingGroups }) {
   );
 }
 
-function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup, onEditImages }) {
+function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup }) {
   const [nama, setNama] = useState("");
   const [grup, setGrup] = useState(order.grup);
-  const [addingPhoto, setAddingPhoto] = useState(false);
-  const [lightboxIdx, setLightboxIdx] = useState(null);
   const isDone = order.stage === DONE_KEY;
   const meta = stageMeta(order.stage);
-  const detailFileRef = useRef(null);
 
   function handleGrupBlur() {
     if (grup.trim() !== order.grup) onEditGrup(grup.trim());
-  }
-
-  function handleAddPhotos(e) {
-    const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    setAddingPhoto(true);
-    let remaining = files.length;
-    const results = [];
-    files.forEach((file) => {
-      resizeImage(file, 640, (dataUrl) => {
-        if (dataUrl) results.push(dataUrl);
-        remaining -= 1;
-        if (remaining === 0) {
-          onEditImages([...order.images, ...results]);
-          setAddingPhoto(false);
-        }
-      });
-    });
-    e.target.value = "";
-  }
-
-  function removePhoto(idx) {
-    onEditImages(order.images.filter((_, i) => i !== idx));
   }
 
   function handleAdvance() {
@@ -698,28 +606,7 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
         <button className="kpp-modal-close" onClick={onClose}><X size={18} /></button>
         <h2>Detail pesanan</h2>
 
-        <div className="kpp-gallery">
-          {order.images.length > 0 ? (
-            <div className="kpp-gallery-grid">
-              {order.images.map((src, idx) => (
-                <div className="kpp-gallery-item" key={idx}>
-                  <button type="button" style={{ all: "unset", cursor: "pointer", display: "block", width: "100%", height: "100%" }} onClick={() => setLightboxIdx(idx)}>
-                    <img src={src} alt={`Foto ${idx + 1}`} />
-                  </button>
-                  <button type="button" className="kpp-gallery-remove" onClick={() => removePhoto(idx)}>
-                    <X size={12} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className="kpp-gallery-empty">Belum ada foto.</div>
-          )}
-          <input ref={detailFileRef} type="file" accept="image/*" multiple onChange={handleAddPhotos} style={{ display: "none" }} />
-          <button type="button" className="kpp-file-btn" onClick={() => detailFileRef.current?.click()}>
-            <Upload size={14} /> {addingPhoto ? "Memproses foto..." : "Tambah foto"}
-          </button>
-        </div>
+        {order.image && <img className="kpp-detail-img" src={order.image} alt={order.deskripsi || "Foto pesanan"} />}
         <div className="kpp-detail-resi">No. {order.noResi || "-"}</div>
         <div className="kpp-detail-desc">{order.deskripsi || "Tanpa deskripsi"}</div>
 
@@ -784,31 +671,6 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
           </button>
         </div>
       </div>
-
-      {lightboxIdx !== null && order.images[lightboxIdx] && (
-        <div className="kpp-lightbox" onClick={(e) => { e.stopPropagation(); setLightboxIdx(null); }}>
-          <button className="kpp-lightbox-close" onClick={(e) => { e.stopPropagation(); setLightboxIdx(null); }}>
-            <X size={18} />
-          </button>
-          {order.images.length > 1 && (
-            <button
-              className="kpp-lightbox-nav kpp-lightbox-prev"
-              onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i - 1 + order.images.length) % order.images.length); }}
-            >
-              <ChevronLeft size={20} />
-            </button>
-          )}
-          <img src={order.images[lightboxIdx]} alt={`Foto ${lightboxIdx + 1}`} onClick={(e) => e.stopPropagation()} />
-          {order.images.length > 1 && (
-            <button
-              className="kpp-lightbox-nav kpp-lightbox-next"
-              onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i + 1) % order.images.length); }}
-            >
-              <ChevronRight size={20} />
-            </button>
-          )}
-        </div>
-      )}
     </div>
   );
 }
