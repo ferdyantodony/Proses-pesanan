@@ -55,32 +55,35 @@ const SORT_OPTIONS = [
   { key: "resi", label: "No. Resi (A-Z)" },
   { key: "grup", label: "Grup (A-Z)" },
 ];
+function compareBySortKey(a, b, sortKey) {
+  if (sortKey === "terlama") return new Date(a.createdAt) - new Date(b.createdAt);
+  if (sortKey === "resi") return a.noResi.localeCompare(b.noResi, "id");
+  if (sortKey === "grup") return (a.grup || "").localeCompare(b.grup || "", "id");
+  return new Date(b.createdAt) - new Date(a.createdAt);
+}
 function sortItems(items, sortKey) {
-  const sorted = [...items];
-  if (sortKey === "terlama") {
-    sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-  } else if (sortKey === "resi") {
-    sorted.sort((a, b) => a.noResi.localeCompare(b.noResi, "id"));
-  } else if (sortKey === "grup") {
-    sorted.sort((a, b) => (a.grup || "").localeCompare(b.grup || "", "id"));
-  } else {
-    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-  }
-  return sorted;
+  return [...items].sort((a, b) => compareBySortKey(a, b, sortKey));
 }
 const NO_GROUP = "Tanpa grup";
-function groupOrders(items) {
+function groupOrders(items, sortKey) {
   const map = new Map();
   for (const o of items) {
     const key = (o.grup || "").trim() || NO_GROUP;
     if (!map.has(key)) map.set(key, []);
     map.get(key).push(o);
   }
-  return [...map.entries()].sort(([a], [b]) => {
-    if (a === NO_GROUP) return 1;
-    if (b === NO_GROUP) return -1;
-    return a.localeCompare(b, "id");
+  const groups = [...map.entries()];
+  groups.sort(([keyA, itemsA], [keyB, itemsB]) => {
+    if (sortKey === "grup") {
+      if (keyA === NO_GROUP) return 1;
+      if (keyB === NO_GROUP) return -1;
+      return keyA.localeCompare(keyB, "id");
+    }
+    // Items inside each group are already sorted by the chosen criterion,
+    // so the first item of each group represents that group's rank.
+    return compareBySortKey(itemsA[0], itemsB[0], sortKey);
   });
+  return groups;
 }
 function formatDate(iso) {
   try {
@@ -494,7 +497,7 @@ export default function App() {
                   {items.length === 0 && (
                     <div className="kpp-empty">Belum ada pesanan di tahap ini.</div>
                   )}
-                  {groupOrders(items).map(([groupName, groupItems]) => {
+                  {groupOrders(items, sortBy[col.key] || "terbaru").map(([groupName, groupItems]) => {
                     const ids = groupItems.map((o) => o.id);
                     const allSelected = ids.every((id) => selectedIds.has(id));
                     return (
