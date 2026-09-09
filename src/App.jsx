@@ -106,6 +106,8 @@ export default function App() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const [showNew, setShowNew] = useState(false);
   const [detailId, setDetailId] = useState(null);
   const [notice, setNotice] = useState("");
@@ -251,13 +253,17 @@ export default function App() {
   }
 
   const q = query.trim().toLowerCase();
-  const filtered = orders.filter(
-    (o) =>
+  const filtered = orders.filter((o) => {
+    const matchesQuery =
       !q ||
       o.noResi.toLowerCase().includes(q) ||
       o.deskripsi.toLowerCase().includes(q) ||
-      o.grup.toLowerCase().includes(q)
-  );
+      o.grup.toLowerCase().includes(q);
+    const createdDate = o.createdAt ? o.createdAt.slice(0, 10) : "";
+    const matchesFrom = !dateFrom || createdDate >= dateFrom;
+    const matchesTo = !dateTo || createdDate <= dateTo;
+    return matchesQuery && matchesFrom && matchesTo;
+  });
   const detailOrder = orders.find((o) => o.id === detailId) || null;
   const existingGroups = [...new Set(orders.map((o) => o.grup).filter(Boolean))].sort((a, b) =>
     a.localeCompare(b, "id")
@@ -283,6 +289,12 @@ export default function App() {
         .kpp-search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #8C8676; }
         .kpp-search input { width: 100%; padding: 9px 12px 9px 34px; border: 1px solid #C9C3B0; border-radius: 5px; background: #FBF9F3; font-size: 14px; color: #201E1B; }
         .kpp-search input::placeholder { color: #9C9686; }
+
+        .kpp-daterange { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .kpp-daterange label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6B6659; }
+        .kpp-daterange input[type=date] { border: 1px solid #C9C3B0; border-radius: 5px; padding: 7px 9px; font-size: 13px; background: #FBF9F3; color: #201E1B; }
+        .kpp-date-clear { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; color: #6B6659; background: none; border: none; padding: 4px 2px; text-decoration: underline; }
+        .kpp-date-clear:hover { color: #201E1B; }
         .kpp-add-btn { display: inline-flex; align-items: center; gap: 6px; background: #2F4A73; color: #F3F1E9; border: none; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: 500; }
         .kpp-add-btn:hover { background: #263C5E; }
         .kpp-notice { max-width: 1180px; margin: 0 auto 12px; background: #F4E4CF; border: 1px solid #C99A55; color: #6B4A16; padding: 9px 14px; border-radius: 5px; font-size: 13px; display: flex; justify-content: space-between; gap: 12px; }
@@ -424,6 +436,21 @@ export default function App() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
             />
+          </div>
+          <div className="kpp-daterange">
+            <label>
+              <span>Dari</span>
+              <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} max={dateTo || undefined} />
+            </label>
+            <label>
+              <span>Sampai</span>
+              <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} min={dateFrom || undefined} />
+            </label>
+            {(dateFrom || dateTo) && (
+              <button type="button" className="kpp-date-clear" onClick={() => { setDateFrom(""); setDateTo(""); }}>
+                <X size={13} /> Reset tanggal
+              </button>
+            )}
           </div>
           <button className="kpp-add-btn" onClick={() => setShowNew(true)}>
             <Plus size={16} /> Pesanan Baru
