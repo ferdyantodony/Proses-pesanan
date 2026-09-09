@@ -48,6 +48,25 @@ function resizeImage(file, maxDim, cb) {
   reader.onerror = () => cb(null);
   reader.readAsDataURL(file);
 }
+const SORT_OPTIONS = [
+  { key: "terbaru", label: "Terbaru" },
+  { key: "terlama", label: "Terlama" },
+  { key: "resi", label: "No. Resi (A-Z)" },
+  { key: "grup", label: "Grup (A-Z)" },
+];
+function sortItems(items, sortKey) {
+  const sorted = [...items];
+  if (sortKey === "terlama") {
+    sorted.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  } else if (sortKey === "resi") {
+    sorted.sort((a, b) => a.noResi.localeCompare(b.noResi, "id"));
+  } else if (sortKey === "grup") {
+    sorted.sort((a, b) => (a.grup || "").localeCompare(b.grup || "", "id"));
+  } else {
+    sorted.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  }
+  return sorted;
+}
 const NO_GROUP = "Tanpa grup";
 function groupOrders(items) {
   const map = new Map();
@@ -90,6 +109,7 @@ export default function App() {
   const [detailId, setDetailId] = useState(null);
   const [notice, setNotice] = useState("");
   const [selectedIds, setSelectedIds] = useState(new Set());
+  const [sortBy, setSortBy] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -278,6 +298,10 @@ export default function App() {
         .kpp-col-title { font-weight: 600; font-size: 14px; flex: 1; }
         .kpp-col-count { font-size: 12px; color: #6B6659; background: #F3F1E9; border-radius: 10px; padding: 1px 8px; }
 
+        .kpp-col-sort { display: flex; align-items: center; gap: 6px; padding: 8px 12px 0; }
+        .kpp-col-sort label { font-size: 11px; color: #8C8676; }
+        .kpp-col-sort select { flex: 1; font-size: 12px; padding: 4px 6px; border-radius: 5px; border: 1px solid #D4CEBC; background: #FBF9F3; color: #3A3730; }
+
         .kpp-col-body { padding: 10px; display: flex; flex-direction: column; gap: 14px; overflow-y: auto; }
         .kpp-empty { font-size: 12.5px; color: #918C7C; padding: 18px 6px; text-align: center; line-height: 1.5; }
 
@@ -418,13 +442,25 @@ export default function App() {
       ) : (
         <div className="kpp-board">
           {COLUMNS.map((col, i) => {
-            const items = filtered.filter((o) => o.stage === col.key);
+            const items = sortItems(filtered.filter((o) => o.stage === col.key), sortBy[col.key] || "terbaru");
             return (
               <div className="kpp-col" key={col.key} style={{ "--accent": col.accent }}>
                 <div className="kpp-col-head">
                   <span className="kpp-col-num">{i + 1}</span>
                   <span className="kpp-col-title">{col.label}</span>
                   <span className="kpp-col-count">{items.length}</span>
+                </div>
+                <div className="kpp-col-sort">
+                  <label htmlFor={`sort-${col.key}`}>Urutkan</label>
+                  <select
+                    id={`sort-${col.key}`}
+                    value={sortBy[col.key] || "terbaru"}
+                    onChange={(e) => setSortBy((cur) => ({ ...cur, [col.key]: e.target.value }))}
+                  >
+                    {SORT_OPTIONS.map((opt) => (
+                      <option value={opt.key} key={opt.key}>{opt.label}</option>
+                    ))}
+                  </select>
                 </div>
                 <div className="kpp-col-body">
                   {items.length === 0 && (
