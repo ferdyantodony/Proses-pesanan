@@ -7,9 +7,10 @@ const STAGES = [
   { key: "gunting", label: "Cetak", accent: "#55625F" },
   { key: "jahit", label: "Gunting", accent: "#8B2E3A" },
   { key: "packing", label: "Jahit", accent: "#6B5637" },
+  { key: "selesai", label: "Packing", accent: "#3B5B8C" },
 ];
-const DONE_KEY = "selesai";
-const COLUMNS = [...STAGES, { key: DONE_KEY, label: "Packing", accent: "#3F6B4E" }];
+const DONE_KEY = "tuntas";
+const COLUMNS = [...STAGES, { key: DONE_KEY, label: "Selesai", accent: "#3F6B4E" }];
 const TABLE = "orders";
 
 function newId() {
@@ -288,7 +289,7 @@ export default function App() {
         .kpp-notice button { background: none; border: none; color: inherit; text-decoration: underline; font-size: 13px; padding: 0; }
 
         .kpp-board { max-width: 1180px; margin: 0 auto; display: flex; gap: 14px; overflow-x: auto; padding-bottom: 8px; scroll-snap-type: x proximity; }
-        @media (min-width: 920px) { .kpp-board { display: grid; grid-template-columns: repeat(5, 1fr); overflow: visible; } }
+        @media (min-width: 920px) { .kpp-board { display: grid; grid-template-columns: repeat(6, 1fr); overflow: visible; } }
 
         .kpp-col { background: #E1DCCC; flex: 0 0 260px; scroll-snap-align: start; min-width: 0; border-radius: 7px; display: flex; flex-direction: column; max-height: calc(100vh - 200px); min-height: 220px; }
         @media (min-width: 920px) { .kpp-col { flex: 1 1 auto; } }
@@ -411,7 +412,7 @@ export default function App() {
       <header className="kpp-header">
         <h1 className="kpp-title">Proses Pesanan</h1>
         <p className="kpp-sub">
-          Lacak setiap pesanan dari desain sampai packing. Setiap tahap mencatat nama orang yang mengerjakannya.
+          Lacak setiap pesanan dari desain sampai selesai. Setiap tahap mencatat nama orang yang mengerjakannya.
           Data tersimpan di server bersama — semua yang membuka aplikasi ini melihat dan mengubah data yang sama.
         </p>
         <div className="kpp-toolbar">
@@ -789,7 +790,7 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
         </div>
 
         {isDone ? (
-          <div className="kpp-done-note">Pesanan ini sudah selesai packing.</div>
+          <div className="kpp-done-note">Pesanan ini sudah selesai.</div>
         ) : (
           <div className="kpp-advance-box" style={{ "--accent": meta.accent }}>
             <label htmlFor="namaPemroses">Nama pemroses tahap {nextMeta.label.toLowerCase()}</label>
