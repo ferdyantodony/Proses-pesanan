@@ -64,20 +64,6 @@ function compareBySortKey(a, b, sortKey) {
 function sortItems(items, sortKey) {
   return [...items].sort((a, b) => compareBySortKey(a, b, sortKey));
 }
-function formatDateInput(raw) {
-  const digits = raw.replace(/\D/g, "").slice(0, 8);
-  const parts = [];
-  if (digits.length > 0) parts.push(digits.slice(0, 2));
-  if (digits.length > 2) parts.push(digits.slice(2, 4));
-  if (digits.length > 4) parts.push(digits.slice(4, 8));
-  return parts.join("/");
-}
-function dmyToIso(dmy) {
-  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(dmy);
-  if (!m) return "";
-  const [, d, mo, y] = m;
-  return `${y}-${mo}-${d}`;
-}
 const NO_GROUP = "Tanpa grup";
 function groupOrders(items, sortKey) {
   const map = new Map();
@@ -98,6 +84,15 @@ function groupOrders(items, sortKey) {
     return compareBySortKey(itemsA[0], itemsB[0], sortKey);
   });
   return groups;
+}
+function toLocalDateStr(iso) {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 function formatDate(iso) {
   try {
@@ -280,17 +275,15 @@ export default function App() {
   }
 
   const q = query.trim().toLowerCase();
-  const isoFrom = dmyToIso(dateFrom);
-  const isoTo = dmyToIso(dateTo);
   const filtered = orders.filter((o) => {
     const matchesQuery =
       !q ||
       o.noResi.toLowerCase().includes(q) ||
       o.deskripsi.toLowerCase().includes(q) ||
       o.grup.toLowerCase().includes(q);
-    const createdDate = o.createdAt ? o.createdAt.slice(0, 10) : "";
-    const matchesFrom = !isoFrom || createdDate >= isoFrom;
-    const matchesTo = !isoTo || createdDate <= isoTo;
+    const createdDate = toLocalDateStr(o.createdAt);
+    const matchesFrom = !dateFrom || createdDate >= dateFrom;
+    const matchesTo = !dateTo || createdDate <= dateTo;
     return matchesQuery && matchesFrom && matchesTo;
   });
   const detailOrder = orders.find((o) => o.id === detailId) || null;
@@ -321,7 +314,7 @@ export default function App() {
 
         .kpp-daterange { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
         .kpp-daterange label { display: flex; align-items: center; gap: 6px; font-size: 12.5px; color: #6B6659; }
-        .kpp-daterange input[type=text] { border: 1px solid #C9C3B0; border-radius: 5px; padding: 7px 9px; font-size: 13px; background: #FBF9F3; color: #201E1B; width: 108px; }
+        .kpp-daterange input[type=date] { border: 1px solid #C9C3B0; border-radius: 5px; padding: 7px 9px; font-size: 13px; background: #FBF9F3; color: #201E1B; }
         .kpp-date-clear { display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px; color: #6B6659; background: none; border: none; padding: 4px 2px; text-decoration: underline; }
         .kpp-date-clear:hover { color: #201E1B; }
         .kpp-add-btn { display: inline-flex; align-items: center; gap: 6px; background: #2F4A73; color: #F3F1E9; border: none; border-radius: 5px; padding: 10px 16px; font-size: 14px; font-weight: 500; }
@@ -470,25 +463,11 @@ export default function App() {
           <div className="kpp-daterange">
             <label>
               <span>Dari</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="dd/mm/yyyy"
-                maxLength={10}
-                value={dateFrom}
-                onChange={(e) => setDateFrom(formatDateInput(e.target.value))}
-              />
+              <input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} max={dateTo || undefined} />
             </label>
             <label>
               <span>Sampai</span>
-              <input
-                type="text"
-                inputMode="numeric"
-                placeholder="dd/mm/yyyy"
-                maxLength={10}
-                value={dateTo}
-                onChange={(e) => setDateTo(formatDateInput(e.target.value))}
-              />
+              <input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} min={dateFrom || undefined} />
             </label>
             {(dateFrom || dateTo) && (
               <button type="button" className="kpp-date-clear" onClick={() => { setDateFrom(""); setDateTo(""); }}>
