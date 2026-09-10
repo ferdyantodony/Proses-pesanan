@@ -234,6 +234,16 @@ export default function App() {
     }
   }
 
+  async function updateDeskripsi(order, deskripsi) {
+    const updated = { ...order, deskripsi };
+    setOrders((cur) => cur.map((o) => (o.id === order.id ? updated : o)));
+    const { error } = await supabase.from(TABLE).update({ deskripsi }).eq("id", order.id);
+    if (error) {
+      setNotice("Gagal menyimpan deskripsi ke server.");
+      setOrders((cur) => cur.map((o) => (o.id === order.id ? order : o)));
+    }
+  }
+
   async function updateImages(order, images) {
     const updated = { ...order, images };
     setOrders((cur) => cur.map((o) => (o.id === order.id ? updated : o)));
@@ -363,7 +373,8 @@ export default function App() {
 
         .kpp-detail-img { width: 100%; max-height: 220px; object-fit: cover; border-radius: 6px; margin-bottom: 14px; border: 1px solid #D4CEBC; }
         .kpp-detail-resi { font-size: 12px; font-weight: 600; color: #6B6659; margin-bottom: 6px; }
-        .kpp-detail-desc { font-size: 14px; line-height: 1.55; color: #262420; margin-bottom: 16px; }
+        .kpp-detail-desc-input { width: 100%; font: inherit; font-size: 14px; line-height: 1.55; color: #262420; margin-bottom: 16px; padding: 8px 10px; border: 1px solid transparent; border-radius: 5px; background: transparent; resize: vertical; font-family: inherit; }
+        .kpp-detail-desc-input:hover, .kpp-detail-desc-input:focus { border-color: #D4CEBC; background: #FBF9F3; outline: none; }
         .kpp-stage-row { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
         .kpp-advance-box { background: #EFEBDD; border-radius: 6px; padding: 12px; margin-bottom: 16px; }
         .kpp-advance-box label { display: block; font-size: 12.5px; font-weight: 600; color: #4A473C; margin-bottom: 6px; }
@@ -586,6 +597,7 @@ export default function App() {
           onRevert={() => revert(detailOrder)}
           onDelete={() => removeOrder(detailOrder.id)}
           onEditGrup={(grup) => updateGrup(detailOrder, grup)}
+          onEditDeskripsi={(deskripsi) => updateDeskripsi(detailOrder, deskripsi)}
           onEditImages={(images) => updateImages(detailOrder, images)}
         />
       )}
@@ -729,9 +741,10 @@ function NewOrderModal({ onClose, onSubmit, existingGroups }) {
   );
 }
 
-function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup, onEditImages }) {
+function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup, onEditImages, onEditDeskripsi }) {
   const [nama, setNama] = useState("");
   const [grup, setGrup] = useState(order.grup);
+  const [deskripsi, setDeskripsi] = useState(order.deskripsi);
   const [addingPhoto, setAddingPhoto] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState(null);
   const isDone = order.stage === DONE_KEY;
@@ -741,6 +754,10 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
 
   function handleGrupBlur() {
     if (grup.trim() !== order.grup) onEditGrup(grup.trim());
+  }
+
+  function handleDeskripsiBlur() {
+    if (deskripsi.trim() !== order.deskripsi) onEditDeskripsi(deskripsi.trim());
   }
 
   function handleAddPhotos(e) {
@@ -801,7 +818,14 @@ function DetailModal({ order, onClose, onAdvance, onRevert, onDelete, onEditGrup
           </button>
         </div>
         <div className="kpp-detail-resi">No. {order.noResi || "-"}</div>
-        <div className="kpp-detail-desc">{order.deskripsi || "Tanpa deskripsi"}</div>
+        <textarea
+          className="kpp-detail-desc-input"
+          value={deskripsi}
+          onChange={(e) => setDeskripsi(e.target.value)}
+          onBlur={handleDeskripsiBlur}
+          placeholder="Tanpa deskripsi"
+          rows={2}
+        />
 
         <div className="kpp-field kpp-detail-grup">
           <label htmlFor="grupDetail"><Users size={11} /> Grup</label>
